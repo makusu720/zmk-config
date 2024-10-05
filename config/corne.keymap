@@ -16,7 +16,7 @@ ZMK_UNICODE_SINGLE(uc_hor_ellips, N2, N0, N2, N6) //…
 ZMK_UNICODE_SINGLE(uc_lat_small_lett_long_s, N0, N1, N7, F) //ſ
 ZMK_UNICODE_SINGLE(uc_minus_sign, N2, N2, N1, N2) //−
 ZMK_UNICODE_SINGLE(uc_inverted_excl, N0, N0, A, N1) //¡
-ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, b, f) //¿
+ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, B, F) //¿
 
 / {
 
