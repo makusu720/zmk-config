@@ -40,6 +40,14 @@ ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, B, F) //¿
             };
 	};
 
+        conditional_layers {
+          compatible = "zmk,conditional-layers";
+          tri_layer {
+            if-layers = <2 3>;
+            then-layer = <4>;
+          };
+        };
+
         keymap {
                 compatible = "zmk,keymap";
 
@@ -75,12 +83,12 @@ ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, B, F) //¿
 // |   @   |  …  |  _  |  [  |  ]  |  ^  |   |  !  |  <  |  >  |  =  |  &  |   ſ   |
 // |  M3   |  \  |  /  |  {  |  }  |  *  |   |  ?  |  (  |  )  |  -  |  :  |  M3   |
 // | LMETA |  #  |  $  | "|" |  ~  |  `  |   |  +  |  %  |  "  |  '  |  ;  | RMETA |
-//                     | GUI |     | SPC |   | ENT | SPC | ALT |
+//                     | M4  |     | TAB |   | ENT | SPC | M4  |
                         bindings = <
    &kp DE_AT &uc_hor_ellips &kp DE_UNDERSCORE &kp DE_LEFT_BRACKET &kp DE_RIGHT_BRACKET &kp DE_CARET        &kp DE_EXCLAMATION &kp DE_LT    &kp DE_GT   &kp DE_EQUAL &kp DE_AMPS  &uc_lat_small_lett_long_s
    &mo 2     &kp DE_BSLH    &kp DE_FSLH       &kp DE_LEFT_BRACE   &kp DE_RIGHT_BRACE   &kp DE_STAR         &kp DE_QMARK       &kp DE_LPAR  &kp DE_RPAR &kp DE_MINUS &kp DE_COLON &mo 2
    &kp LMETA &kp DE_HASH    &kp DE_DLLR       &kp DE_PIPE         &kp DE_TILDE         &kp DE_GRAVE        &kp DE_PLUS        &kp DE_PRCNT &kp DE_DQT  &kp DE_SQT   &kp DE_SEMI  &kp RMETA
-                                              &mo 4               &trans               &kp TAB             &kp RET            &kp SPACE    &mo 4
+                                              &mo 3               &trans               &kp TAB             &kp RET            &kp SPACE    &mo 3
                         >;
                 };
 
@@ -89,12 +97,25 @@ ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, B, F) //¿
 // |   –   |  ⇞  |  ⌫  |  ⇡  |  ⌦  |  ⇟  |   |  ¡  |  7  |  8  |  9  |  +  |   ;   |
 // |  M3   |  \  |  /  |  {  |  }  |  *  |   |  ¿  |  4  |  5  |  6  |  .  |  M3   |
 // | LMETA |  #  |  $  | "|" |  ~  |  `  |   |  +  |  1  |  2  |  3  |  ,  | RMETA |
-//                     | GUI |     | TAB |   | ENT | SPC | ALT |
+//                     | M4  |     | TAB |   | ENT | SPC | M4  |
                         bindings = <
    &uc_minus_sign &kp PAGE_UP &kp BACKSPACE  &kp UP_ARROW   &kp DELETE      &kp PAGE_DOWN        &uc_inverted_excl  &kp N7    &kp N8 &kp N9 &kp DE_PLUS  &kp DE_SEMI
    &mo 2          &kp HOME    &kp LEFT_ARROW &kp DOWN_ARROW &kp RIGHT_ARROW &kp END              &uc_inverted_quest &kp N4    &kp N5 &kp N6 &kp DE_DOT   &mo 2
    &kp LMETA      &kp ESC     &kp TAB        &kp K_PASTE    &kp RET         &kp K_UNDO           &kp DE_COLON       &kp N1    &kp N2 &kp N3 &kp DE_COMMA &kp RMETA
-                                             &mo 4          &trans          &kp TAB              &kp RET            &kp SPACE &mo 4
+                                             &mo 3          &trans          &kp TAB              &kp RET            &kp SPACE &mo 3
+                        >;
+                };
+                control_layer {
+// -----------------------------------------------------------------------------------------
+// |       |     |     |     |     |     |   |     |     |     |     |     |       |
+// |  M3   |     |     |     |     |     |   |     |     |     |     |     |  M3   |
+// | LMETA |     |     |     |     |     |   |     |     |     |     |     | RMETA |
+//                     | M4  |     | TAB |   | ENT | SPC |  M4 |
+                        bindings = <
+   &trans    &trans     &trans     &trans     &trans &trans        &trans  &trans    &trans   &trans  &trans &trans
+   &mo 2     &kp BT_CLR &kp BT_PRV &kp BT_NXT &trans &trans        &trans  &trans    &trans   &trans  &trans &mo 2
+   &kp LMETA &trans     &trans     &trans     &trans &trans        &trans  &trans    &trans   &trans  &trans &kp RMETA
+                                   &mo 3      &trans &kp TAB       &kp RET &kp SPACE &mo 3 
                         >;
                 };
         };
