@@ -152,7 +152,7 @@ ZMK_UNICODE_SINGLE(uc_inverted_quest, N0, N0, B, F) //¿
 //                     | M4  |     | TAB |   | ENT | SPC |  M4 |
                         bindings = <
    &trans    &trans     &trans     &trans     &trans &trans        &trans  &trans    &trans   &trans  &trans &trans
-   &mo 2     &bt BT_CLR &bt BT_PRV &bt BT_NXT &trans &trans        &trans  &trans    &trans   &trans  &trans &mo 2
+   &mo 2     &bt BT_CLR &bt BT_PRV &bt BT_NXT &trans &trans        &trans  &trans    &studio_unlock   &trans  &trans &mo 2
    &kp LMETA &trans     &trans     &trans     &trans &trans        &trans  &trans    &trans   &trans  &trans &kp RMETA
                                    &mo 3      &trans &kp TAB       &kp RET &kp SPACE &mo 3 
                         >;
