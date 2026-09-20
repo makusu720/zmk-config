@@ -4,64 +4,95 @@
  * SPDX-License-Identifier: MIT
  */
 
-#define HOST_OS 2
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include "zmk-helpers/helper.h"
-#include "zmk-helpers/key-labels/42.h"
 #include <locale/keys_de.h>
 
-/* Mac German key overrides
- * macOS uses Option (Alt) combos that differ from Linux/Windows DE layout */
-#undef DE_AT_SIGN
-#define DE_AT_SIGN      (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_L)))
-#undef DE_LEFT_BRACKET
-#define DE_LEFT_BRACKET (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_5_AND_PERCENT)))
-#undef DE_RIGHT_BRACKET
-#define DE_RIGHT_BRACKET (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_6_AND_CARET)))
-#undef DE_LEFT_BRACE
-#define DE_LEFT_BRACE   (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_8_AND_ASTERISK)))
-#undef DE_RIGHT_BRACE
-#define DE_RIGHT_BRACE  (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_9_AND_LEFT_PARENTHESIS)))
-#undef DE_BACKSLASH
-#define DE_BACKSLASH    (RA(LS(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_7_AND_AMPERSAND))))
-#undef DE_PIPE
-#define DE_PIPE         (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_7_AND_AMPERSAND)))
-#undef DE_TILDE
-#define DE_TILDE        (RA(ZMK_HID_USAGE(HID_USAGE_KEY, HID_USAGE_KEY_KEYBOARD_N)))
+/* Layer numbers follow declaration order. */
+#define LAYER_AEROSPACE   1
+#define LAYER_PROGRAMMING 2
+#define LAYER_NAVIGATION  3
+#define LAYER_CONTROL     4
 
-/* Unicode characters
- * Requires "Unicode Hex Input" in macOS System Settings → Keyboard → Input Sources.
- * Uses LALT+hex (Left Option), so Right Option combos above remain unaffected. */
-ZMK_UNICODE_SINGLE(uc_dot,                   N2, N0, N2, N2)  // •
-ZMK_UNICODE_SINGLE(uc_dash,                  N2, N0, N1, N3)  // –
-ZMK_UNICODE_SINGLE(uc_hor_ellips,            N2, N0, N2, N6)  // …
-ZMK_UNICODE_SINGLE(uc_lat_small_lett_long_s, N0, N1, N7, F)   // ſ
-ZMK_UNICODE_SINGLE(uc_minus_sign,            N2, N2, N1, N2)  // −
-ZMK_UNICODE_SINGLE(uc_inverted_excl,         N0, N0, A,  N1)  // ¡
-ZMK_UNICODE_SINGLE(uc_inverted_quest,        N0, N0, B,  F)   // ¿
+/* Standard macOS German input source, ISO keyboard type.
+ * Option combinations differ from the generic German locale header.
+ */
+#define MAC_AT          RA(DE_L)
+#define MAC_LBKT        RA(N5)
+#define MAC_RBKT        RA(N6)
+#define MAC_LBRC        RA(N8)
+#define MAC_RBRC        RA(N9)
+#define MAC_BACKSLASH   RA(LS(N7))
+#define MAC_PIPE        RA(N7)
+#define MAC_TILDE       RA(DE_N)
+#define MAC_BULLET      RA(DE_U_UMLAUT)
+#define MAC_EN_DASH     RA(DE_MINUS)
+#define MAC_EM_DASH     LS(RA(DE_MINUS))
+#define MAC_ELLIPSIS    RA(DE_DOT)
+#define MAC_INV_EXCL    RA(N1)
+#define MAC_INV_QUEST   RA(DE_SZ)
 
-/* Layer + modifier macro: activates a layer while holding a modifier key.
- * Usage: &lm LAYER MODIFIER  (e.g. &lm 1 LSHIFT) */
-ZMK_MACRO_TWO_PARAM(lm,
-    wait-ms = <0>;
-    tap-ms = <0>;
-    bindings
-      = <&macro_param_1to1>
-      , <&macro_press &mo MACRO_PLACEHOLDER>
-      , <&macro_param_2to1>
-      , <&macro_press &kp MACRO_PLACEHOLDER>
-      , <&macro_pause_for_release>
-      , <&macro_param_2to1>
-      , <&macro_release &kp MACRO_PLACEHOLDER>
-      , <&macro_param_1to1>
-      , <&macro_release &mo MACRO_PLACEHOLDER>
-      ;
+/* Native replacements: Shift+ß -> ¿, programming ſ -> §, navigation − -> —.
+ * Shift-only punctuation masks Shift before sending the Option combination.
+ */
+ZMK_MOD_MORPH(sz_shift,
+    bindings = <&kp DE_SZ>, <&kp MAC_INV_QUEST>;
+    mods = <(MOD_LSFT | MOD_RSFT)>;
+)
+
+ZMK_MOD_MORPH(comma_shift,
+    bindings = <&kp DE_COMMA>, <&kp MAC_EN_DASH>;
+    mods = <(MOD_LSFT | MOD_RSFT)>;
+)
+
+ZMK_MOD_MORPH(dot_shift,
+    bindings = <&kp DE_DOT>, <&kp MAC_BULLET>;
+    mods = <(MOD_LSFT | MOD_RSFT)>;
+)
+
+/* Preserve ordinary punctuation in shortcuts, including Cmd+Shift+period.
+ * These outer morphs bypass the Shift morph when Cmd or Ctrl is held.
+ */
+#define SHORTCUT_MODS (MOD_LGUI | MOD_RGUI | MOD_LCTL | MOD_RCTL)
+
+ZMK_MOD_MORPH(comma_key,
+    bindings = <&comma_shift>, <&kp DE_COMMA>;
+    mods = <SHORTCUT_MODS>;
+    keep-mods = <SHORTCUT_MODS>;
+)
+
+ZMK_MOD_MORPH(dot_key,
+    bindings = <&dot_shift>, <&kp DE_DOT>;
+    mods = <SHORTCUT_MODS>;
+    keep-mods = <SHORTCUT_MODS>;
+)
+
+/* Finish dead keys with Space so programming symbols are emitted immediately.
+ * Use these with Shift/Option released; additional held modifiers affect them.
+ */
+ZMK_MACRO(literal_caret,
+    wait-ms = <10>;
+    tap-ms = <10>;
+    bindings = <&macro_tap &kp DE_CARET &kp SPACE>;
+)
+
+ZMK_MACRO(literal_tilde,
+    wait-ms = <10>;
+    tap-ms = <10>;
+    bindings = <&macro_tap &kp MAC_TILDE &kp SPACE>;
+)
+
+ZMK_MACRO(literal_grave,
+    wait-ms = <10>;
+    tap-ms = <10>;
+    bindings = <&macro_tap &kp DE_GRAVE &kp SPACE>;
 )
 
 /* Thumb hold-tap: tap = key, hold = modifier.
- * balanced flavor + require-prior-idle prevents accidental mod on fast rolls.
+ * A non-modifier key pressed within the preceding 125 ms forces a tap.
+ * Remove require-prior-idle if intentional Ctrl/Alt holds become Tab/Return.
  * Usage: &thm MODIFIER KEY  (e.g. &thm LCTRL TAB) */
 ZMK_HOLD_TAP(thm,
     flavor = "balanced";
@@ -75,8 +106,8 @@ ZMK_HOLD_TAP(thm,
     conditional_layers {
         compatible = "zmk,conditional-layers";
         tri_layer {
-            if-layers = <2 3>;
-            then-layer = <4>;
+            if-layers = <LAYER_PROGRAMMING LAYER_NAVIGATION>;
+            then-layer = <LAYER_CONTROL>;
         };
     };
 };
@@ -85,58 +116,76 @@ ZMK_HOLD_TAP(thm,
    J    Z    Y    U    A    Q  │  P    B    M    L    F    ß
    M3   C    S    I    E    O  │  D    T    N    R    H    M3
   Cmd   V    X    Ü    Ä    Ö  │  W    G    ,    .    K   Cmd
-              M4  Sft  Ctl/Tab │ Alt/Ret  Spc  M4
+              M4  Sft  Ctl/Tab │ Alt/Ret  Spc  AS
 ─────────────────────────────────────────────────────────────────────────── */
 ZMK_LAYER(default_layer,
-  &kp DE_J   &kp DE_Z  &kp DE_Y  &kp DE_U         &kp DE_A         &kp DE_Q          &kp DE_P  &kp DE_B  &kp DE_M      &kp DE_L    &kp DE_F  &kp DE_SZ
-  &mo 2      &kp DE_C  &kp DE_S  &kp DE_I         &kp DE_E         &kp DE_O          &kp DE_D  &kp DE_T  &kp DE_N      &kp DE_R    &kp DE_H  &mo 2
-  &kp LMETA  &kp DE_V  &kp DE_X  &kp DE_U_UMLAUT  &kp DE_A_UMLAUT  &kp DE_O_UMLAUT   &kp DE_W  &kp DE_G  &kp DE_COMMA  &kp DE_DOT  &kp DE_K  &kp RMETA
-                                  &mo 3            &lm 1 LSHIFT     &thm LCTRL TAB    &thm LALT RET  &kp SPACE  &mo 3
+  &kp DE_J               &kp DE_Z  &kp DE_Y  &kp DE_U              &kp DE_A         &kp DE_Q           &kp DE_P       &kp DE_B   &kp DE_M             &kp DE_L  &kp DE_F  &sz_shift
+  &mo LAYER_PROGRAMMING  &kp DE_C  &kp DE_S  &kp DE_I              &kp DE_E         &kp DE_O           &kp DE_D       &kp DE_T   &kp DE_N             &kp DE_R  &kp DE_H  &mo LAYER_PROGRAMMING
+  &kp LMETA              &kp DE_V  &kp DE_X  &kp DE_U_UMLAUT       &kp DE_A_UMLAUT  &kp DE_O_UMLAUT    &kp DE_W       &kp DE_G   &comma_key           &dot_key  &kp DE_K  &kp RMETA
+                                             &mo LAYER_NAVIGATION  &kp LSHIFT       &thm LCTRL TAB     &thm LALT RET  &kp SPACE  &mo LAYER_AEROSPACE
 )
 
-/* ─── Layer 1 — Shift ───────────────────────────────────────────────────────
-   (transparent — shift applies to base layer letters)
-   Only overrides: ß→ẞ, .→•, ,→–
+/* ─── Layer 1 — AeroSpace (right outer thumb) ──────────────────────────────
+   --   --   --   --   --   --  │  --    7    8    9   --   --
+   --   --   --   --   --   --  │  --    4    5    6   --   --
+   --   --   --   --   --   --  │  --    1    2    3   --   --
+                     --  Shift  --  │  --   --   --
 ─────────────────────────────────────────────────────────────────────────── */
-ZMK_LAYER(shift_layer,
-  &trans     &trans  &trans  &trans  &trans  &trans      &trans  &trans    &trans    &trans   &trans  &kp DE_CAPITAL_SZ
-  &mo 2      &trans  &trans  &trans  &trans  &trans      &trans  &trans    &trans    &trans   &trans  &mo 2
-  &kp LMETA  &trans  &trans  &trans  &trans  &trans      &trans  &trans    &uc_dash  &uc_dot  &trans  &kp RMETA
-                             &mo 3   &trans  &thm LCTRL TAB  &thm LALT RET  &kp SPACE  &mo 3
+/* Each number sends Cmd+Ctrl+number. Hold Shift to move the focused window.
+ * No transparent keys: the layer cannot leak text or activate another layer.
+ */
+ZMK_LAYER(aerospace_layer,
+  &none  &none  &none  &none  &none       &none    &none  &kp LG(LC(N7))  &kp LG(LC(N8))  &kp LG(LC(N9))  &none  &none
+  &none  &none  &none  &none  &none       &none    &none  &kp LG(LC(N4))  &kp LG(LC(N5))  &kp LG(LC(N6))  &none  &none
+  &none  &none  &none  &none  &none       &none    &none  &kp LG(LC(N1))  &kp LG(LC(N2))  &kp LG(LC(N3))  &none  &none
+                       &none  &kp LSHIFT  &none    &none  &none           &none
 )
+
+/* M3/M4 are programming/navigation; AS is AeroSpace.
+ * AS is accessible from the base layer; higher layers block its thumb key.
+ * M3/M4 labels indicate physical layer keys;
+ * their own-layer bindings are blocked below.
+ */
 
 /* ─── Layer 2 — Programming (M3) ────────────────────────────────────────────
-   @    …    _    [    ]    ^  │  !    <    >    =    &    ſ
+   @    …    _    [    ]    ^  │  !    <    >    =    &    §
    M3   \    /    {    }    *  │  ?    (    )    -    :    M3
   Cmd   #    $    |    ~    `  │  +    %    "    '    ;   Cmd
-              M4   _  Ctl/Tab  │ Alt/Ret  Spc  M4
+              M4  Sft Ctl/Tab  │ Alt/Ret  Spc  --
 ─────────────────────────────────────────────────────────────────────────── */
 ZMK_LAYER(programming_layer,
-  &kp DE_AT   &uc_hor_ellips  &kp DE_UNDERSCORE  &kp DE_LEFT_BRACKET  &kp DE_RIGHT_BRACKET  &kp DE_CARET    &kp DE_EXCLAMATION  &kp DE_LT    &kp DE_GT    &kp DE_EQUAL  &kp DE_AMPS   &uc_lat_small_lett_long_s
-  &mo 2       &kp DE_BSLH     &kp DE_FSLH        &kp DE_LEFT_BRACE    &kp DE_RIGHT_BRACE    &kp DE_STAR     &kp DE_QMARK        &kp DE_LPAR  &kp DE_RPAR  &kp DE_MINUS  &kp DE_COLON  &mo 2
-  &kp LMETA   &kp DE_HASH     &kp DE_DLLR        &kp DE_PIPE          &kp DE_TILDE          &kp DE_GRAVE    &kp DE_PLUS         &kp DE_PRCNT &kp DE_DQT   &kp DE_SQT    &kp DE_SEMI   &kp RMETA
-                                                  &mo 3                &trans                &thm LCTRL TAB  &thm LALT RET  &kp SPACE  &mo 3
+  &kp MAC_AT  &kp MAC_ELLIPSIS   &kp DE_UNDERSCORE  &kp MAC_LBKT          &kp MAC_RBKT    &literal_caret    &kp DE_EXCLAMATION  &kp DE_LT     &kp DE_GT    &kp DE_EQUAL  &kp DE_AMPS   &kp DE_SECTION
+  &none       &kp MAC_BACKSLASH  &kp DE_FSLH        &kp MAC_LBRC          &kp MAC_RBRC    &kp DE_STAR       &kp DE_QMARK        &kp DE_LPAR   &kp DE_RPAR  &kp DE_MINUS  &kp DE_COLON  &none
+  &kp LMETA   &kp DE_HASH        &kp DE_DLLR        &kp MAC_PIPE          &literal_tilde  &literal_grave    &kp DE_PLUS         &kp DE_PRCNT  &kp DE_DQT   &kp DE_SQT    &kp DE_SEMI   &kp RMETA
+                                                    &mo LAYER_NAVIGATION  &trans          &thm LCTRL TAB    &thm LALT RET       &kp SPACE     &none
 )
 
 /* ─── Layer 3 — Util / Nav+Num (M4) ─────────────────────────────────────────
-   −   PgUp   ⌫    ↑    ⌦   PgDn │  ¡    7    8    9    +    ;
+   —   PgUp   ⌫    ↑    ⌦   PgDn │  ¡    7    8    9    +    ;
    M3  Home   ←    ↓    →   End  │  ¿    4    5    6    .    M3
   Cmd  Esc   Tab  Pst  Ret  Undo │  :    1    2    3    ,   Cmd
-              M4   _  Ctl/Tab    │ Alt/Ret  Spc  M4
+              M4  Sft Ctl/Tab    │ Alt/Ret   0   --
 ─────────────────────────────────────────────────────────────────────────── */
 ZMK_LAYER(util_layer,
-  &uc_minus_sign  &kp PAGE_UP  &kp BACKSPACE   &kp UP_ARROW    &kp DELETE       &kp PAGE_DOWN    &uc_inverted_excl   &kp N7  &kp N8  &kp N9  &kp DE_PLUS   &kp DE_SEMI
-  &mo 2           &kp HOME     &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &kp END          &uc_inverted_quest  &kp N4  &kp N5  &kp N6  &kp DE_DOT    &mo 2
-  &kp LMETA       &kp ESC      &kp TAB         &kp K_PASTE     &kp RET          &kp K_UNDO       &kp DE_COLON        &kp N1  &kp N2  &kp N3  &kp DE_COMMA  &kp RMETA
-                                               &mo 3           &trans           &thm LCTRL TAB   &thm LALT RET  &kp SPACE  &mo 3
+  &kp MAC_EM_DASH        &kp PAGE_UP  &kp BACKSPACE   &kp UP_ARROW    &kp DELETE       &kp PAGE_DOWN     &kp MAC_INV_EXCL   &kp N7  &kp N8  &kp N9  &kp DE_PLUS   &kp DE_SEMI
+  &mo LAYER_PROGRAMMING  &kp HOME     &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW  &kp END           &kp MAC_INV_QUEST  &kp N4  &kp N5  &kp N6  &kp DE_DOT    &mo LAYER_PROGRAMMING
+  &kp LMETA              &kp ESC      &kp TAB         &kp LG(DE_V)    &kp RET          &kp LG(DE_Z)      &kp DE_COLON       &kp N1  &kp N2  &kp N3  &kp DE_COMMA  &kp RMETA
+                                                      &none           &trans           &thm LCTRL TAB    &thm LALT RET      &kp N0  &none
 )
 
 /* ─── Layer 4 — Control (M3 + M4) ───────────────────────────────────────────
-   Bluetooth pairing and studio unlock. Activated by holding both M3 and M4.
+   F1    F2     F3     F4      F5      F6  │ F7    F8     F9      F10    F11   F12
+   --   BT clr BT prev BT next Bri-    Bri+ │ Prev  Play   Studio  Next   Mute  --
+  Cmd    --     --     --      --      --  │ Vol-  Vol+   --      --     --   Cmd
+                         --  Shift  Ctrl  │ Alt   --     --
 ─────────────────────────────────────────────────────────────────────────── */
+/* M3/M4 positions remain blocked. Modifiers are explicit for F-key shortcuts.
+ * Releases of held layer keys use their original press bindings.
+ * Brightness support depends on the Mac/display.
+ */
 ZMK_LAYER(control_layer,
-  &trans     &trans      &trans      &trans      &trans  &trans      &trans  &trans  &trans          &trans  &trans  &trans
-  &mo 2      &bt BT_CLR  &bt BT_PRV  &bt BT_NXT  &trans  &trans      &trans  &trans  &studio_unlock  &trans  &trans  &mo 2
-  &kp LMETA  &trans      &trans      &trans      &trans  &trans      &trans  &trans  &trans          &trans  &trans  &kp RMETA
-                                     &mo 3       &trans  &thm LCTRL TAB  &thm LALT RET  &kp SPACE  &mo 3
+  &kp F1     &kp F2      &kp F3      &kp F4      &kp F5        &kp F6          &kp F7        &kp F8        &kp F9          &kp F10     &kp F11     &kp F12
+  &none      &bt BT_CLR  &bt BT_PRV  &bt BT_NXT  &kp C_BRI_DN  &kp C_BRI_UP    &kp C_PREV    &kp C_PP      &studio_unlock  &kp C_NEXT  &kp C_MUTE  &none
+  &kp LMETA  &none       &none       &none       &none         &none           &kp C_VOL_DN  &kp C_VOL_UP  &none           &none       &none       &kp RMETA
+                                     &none       &kp LSHIFT    &kp LCTRL       &kp LALT      &none         &none
 )
